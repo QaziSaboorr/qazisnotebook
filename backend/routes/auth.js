@@ -4,8 +4,10 @@ const express = require("express"); //importing express
 const router = express.Router(); //using express router
 const User = require("../models/User"); //getting the schema back or importing it
 const { body, validationResult } = require("express-validator"); //this is to check our data, imports body and function
-
-// Create a user using: POST "/api/auth/". Doesnt require Auth
+let bcrypt = require("bcryptjs");
+let jwt = require("jsonwebtoken");
+// Route1 : Create a user using: POST "/api/auth/". Doesnt require Auth
+let jwtSecret = "QaziIsAGoodBoy"; //sign for token created by jwt so that if anyone tempers with data we know
 router.post(
   "/createuser", // creates a route that will be used in our index.js
   [
@@ -31,26 +33,30 @@ router.post(
         return res
           .status(400)
           .json({ error: "sorry a user with this email already exists" }); //error handling
-      } else {
-        let user = await User.create({
-          //creates user in User table
-          name: req.body.name,
-          email: req.body.email,
-          password: req.body.password,
-        });
-        res.json(user);
       }
+      const salt = await bcrypt.genSalt(10); //salt to make our password extra secure
+
+      secPass = await bcrypt.hash(req.body.password, salt); //hash to create a hash for password along with salt added
+
+      let user = await User.create({
+        //creates user in User table
+        name: req.body.name,
+        email: req.body.email,
+        password: secPass,
+      });
+      const data = {
+        user: {
+          id: user.id,
+        },
+      };
+      const authtoken = jwt.sign(data, jwtSecret); //token needs a unique data so we are sending the id of each user to be unique
+      //first argumen is always an object which contains an object
+      res.json({ authtoken }); //{authtoken:authtoken}
     } catch (error) {
       //error handling
       console.log(error);
       res.status(500).send("some error occured");
     }
-
-    // .then((user) => res.json(user))
-    //   .catch((err) => {
-    //     console.log(err);
-    //     res.json({ error: "Please enter a new email", message: err });
-    // });
   }
 );
 
