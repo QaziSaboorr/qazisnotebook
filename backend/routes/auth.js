@@ -6,6 +6,7 @@ const User = require("../models/User"); //getting the schema back or importing i
 const { body, validationResult } = require("express-validator"); //this is to check our data, imports body and function
 let bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
+var fetchuser = require("../middleware/fetchuser");
 // Route1 : Create a user using: POST "/api/auth/". Doesnt require Auth
 let jwtSecret = "QaziIsAGoodBoy"; //sign for token created by jwt so that if anyone tempers with data we know
 router.post(
@@ -60,6 +61,67 @@ router.post(
   }
 );
 
+//Route2: Authenticate a user using :Post "api/auth/login". no Login required
+
+router.post(
+  "/login",
+  [
+    body("email", "Enter a valid name").isEmail(), //using express validator to let server about input types
+    body("password", "Password can not be blank").exists(),
+  ],
+  async (req, res) => {
+    // if there are errors return bad request and the errors
+    const errors = validationResult(req); //now that validator is trainer we pass in client request
+    if (!errors.isEmpty()) {
+      //error handling of input
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { email, password } = req.body;
+
+    try {
+      let user = await User.findOne({ email }); //gettig user from database cause emails are unique in our case
+      if (!user) {
+        //if couldnt find user
+        return res
+          .status(400)
+          .json({ error: "Please try to login with correct credentials" });
+      }
+
+      const passwordCompare = await bcrypt.compare(password, user.password); //compares password with hash
+      if (!passwordCompare) {
+        //if couldnt find password
+        return res
+          .status(400)
+          .json({ error: "Please try to login with correct credentials" });
+      }
+
+      const data = {
+        //this again like above to generate a token
+        user: {
+          id: user.id,
+        },
+      };
+      const authtoken = jwt.sign(data, jwtSecret); //token needs a unique data so we are sending the id of each user which is unique
+      //first argumen is always an object which contains an object
+
+      //each time user signs in we get a new token which we can decode in our getuser function
+      res.json({ authtoken });
+    } catch (error) {
+      //catch error
+      console.log(error);
+      res.status(500).send("internal server error occured ");
+    }
+  }
+);
+
+//Route3: Get loggin  User  details  using :Post "api/auth/getuser".  Login required
+router.post("/getuser", fetchuser, async (req, res) => {
+  try {
+    userId = req.user.id; //this user Id is retrieved using token ,the toke was appended to header of request using middleware function "fetchuser"
+    const user = await User.findById(userId).select("-password"); //give me everything except the password
+    res.send(user); //send in the user info as respone
+  } catch (error) {}
+});
 module.exports = router; //exporting the router
 
 //note 400 -> clients fault
