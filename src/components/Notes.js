@@ -6,10 +6,10 @@ export default function Notes() {
   const { notes, setNotes } = context;
 
   return (
-    <div className="container my-3">
+    <div className="row my-3">
       <h2>Your Notes</h2>
       {notes.map((notes) => {
-        return <Noteitem note={notes} />;
+        return <Noteitem key={notes._id} note={notes} />;
       })}
     </div>
   );
