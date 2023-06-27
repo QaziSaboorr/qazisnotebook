@@ -16,7 +16,7 @@ app.use("/api/auth", require("./routes/auth")); //importing the route from the p
 app.use("/api/notes", require("./routes/notes")); //imorting the route again from s
 
 app.listen(port, () => {
-  console.log(`Example app listening on http://localhost:${port}`);
+  console.log(`Inotebook backend listening on http://localhost:${port}`);
 });
 
 // http://localhost:3000
