@@ -5,6 +5,8 @@ import About from "./components/About";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import NoteState from "./context/notes/NoteState";
 import Alert from "./components/Alert";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 function App() {
   return (
     <>
@@ -17,6 +19,10 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route />
               <Route path="/About" element={<About />} />
+              <Route />
+              <Route path="/Login" element={<Login />} />
+              <Route />
+              <Route path="/Signup" element={<Signup />} />
               <Route />
             </Routes>
           </div>

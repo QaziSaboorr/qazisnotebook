@@ -5,6 +5,9 @@ connectToMongo(); //running the imported function from /db
 
 const app = express(); //app is using express server
 const port = 8000; //server running on port 8000
+var cors = require("cors");
+
+app.use(cors());
 
 app.use(express.json()); //middleware to use json as data exchange between client(frontend) and server(backend)
 

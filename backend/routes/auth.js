@@ -21,9 +21,11 @@ router.post(
   async (req, res) => {
     // if there are errors return bad request and the errors
     const errors = validationResult(req); //now that validator is trainer we pass in client request
+    let success = false;
     if (!errors.isEmpty()) {
       //error handling of input
-      return res.status(400).json({ errors: errors.array() });
+
+      return res.status(400).json({ success, errors: errors.array() });
     }
 
     try {
@@ -33,7 +35,10 @@ router.post(
       if (duplicateEmail) {
         return res
           .status(400)
-          .json({ error: "sorry a user with this email already exists" }); //error handling
+          .json({
+            success,
+            error: "sorry a user with this email already exists",
+          }); //error handling
       }
       const salt = await bcrypt.genSalt(10); //salt to make our password extra secure
 
@@ -52,7 +57,8 @@ router.post(
       };
       const authtoken = jwt.sign(data, jwtSecret); //token needs a unique data so we are sending the id of each user to be unique
       //first argumen is always an object which contains an object
-      res.json({ authtoken }); //{authtoken:authtoken}
+      success = true;
+      res.json({ success, authtoken }); //{authtoken:authtoken}
     } catch (error) {
       //error handling
       console.log(error);
@@ -82,17 +88,21 @@ router.post(
       let user = await User.findOne({ email }); //gettig user from database cause emails are unique in our case
       if (!user) {
         //if couldnt find user
-        return res
-          .status(400)
-          .json({ error: "Please try to login with correct credentials" });
+        const success = false;
+        return res.status(400).json({
+          success,
+          error: "Please try to login with correct credentials",
+        });
       }
 
       const passwordCompare = await bcrypt.compare(password, user.password); //compares password with hash
       if (!passwordCompare) {
+        const success = false;
         //if couldnt find password
-        return res
-          .status(400)
-          .json({ error: "Please try to login with correct credentials" });
+        return res.status(400).json({
+          success,
+          error: "Please try to login with correct credentials",
+        });
       }
 
       const data = {
@@ -103,9 +113,9 @@ router.post(
       };
       const authtoken = jwt.sign(data, jwtSecret); //token needs a unique data so we are sending the id of each user which is unique
       //first argumen is always an object which contains an object
-
+      const success = true;
       //each time user signs in we get a new token which we can decode in our getuser function
-      res.json({ authtoken });
+      res.json({ success, authtoken });
     } catch (error) {
       //catch error
       console.log(error);
@@ -117,7 +127,7 @@ router.post(
 //Route3: Get loggin  User  details  using :Post "api/auth/getuser".  Login required
 router.post("/getuser", fetchuser, async (req, res) => {
   try {
-    userId = req.user.id; //this user Id is retrieved using token ,the toke was appended to header of request using middleware function "fetchuser"
+    const userId = req.user.id; //this user Id is retrieved using token ,the toke was appended to header of request using middleware function "fetchuser"
     const user = await User.findById(userId).select("-password"); //give me everything except the password
     res.send(user); //send in the user info as respone
   } catch (error) {}

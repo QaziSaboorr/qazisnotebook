@@ -111,7 +111,7 @@ router.delete(
         return res.status(401).send("Not allowed");
       }
       note = await Notes.findByIdAndDelete(req.params.id); //req.params.id "id" was one of the parameter in our request
-      res.send("Note has been deleted");
+      res.json("Note has been deleted");
     } catch (error) {
       console.log(error);
       res.status(500).send("some error occured"); //server error remember 500 is used for server error
