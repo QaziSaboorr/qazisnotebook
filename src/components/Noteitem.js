@@ -19,6 +19,7 @@ export default function Noteitem(props) {
             className="fa-regular fa-square-minus mx-2"
             onClick={() => {
               deleteNote(note._id);
+              props.showAlert("Note deleted", "danger");
             }}
           ></i>
           <i
