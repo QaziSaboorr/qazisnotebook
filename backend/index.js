@@ -18,14 +18,9 @@ app.use(express.json()); //middleware to use json as data exchange between clien
 app.use("/api/auth", require("./routes/auth")); //importing the route from the path specified in "require" function
 app.use("/api/notes", require("./routes/notes")); //imorting the route again from s
 
-__dirname = path.resolve();
 
-app.use(express.static(path.join(__dirname, "/frontend/build")));
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));
-});
 app.listen(port, () => {
   console.log(`Inotebook backend listening on http://localhost:${port}`);
 });
 
-// http://localhost:3000
+
