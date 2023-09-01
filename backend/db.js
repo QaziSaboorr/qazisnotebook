@@ -3,9 +3,7 @@ const env = require("dotenv");
 
 mongoose.set("strictQuery", true); // this was just to avoid warning
 const connectToMongo = async () => {
-  mongoose.connect(process.env.MONGO_URI, () => {
-    console.log("connected to moongo hogaya succesfully");
-  });
+  mongoose.connect(process.env.MONGO_URI);
 };
 
 module.exports = connectToMongo; //exporting the function so it can be used in other files
